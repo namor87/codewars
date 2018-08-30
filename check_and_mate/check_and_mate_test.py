@@ -239,6 +239,67 @@ class TestMates(unittest.TestCase):
         ]
         self.assertEquals(isMate(pieces, 0), True, "Double check cant be blocked nor caprured")
 
+    def test_14_pawn_cant_block_by_moving_diagonally(self):
+        pieces = [
+            {'piece': "king",   'owner': 1, 'x': 4, 'y': 0},
+            {'piece': "queen",  'owner': 1, 'x': 7, 'y': 4, 'prevX': 3, 'prevY': 0},
+            {'piece': "pawn",   'owner': 0, 'x': 3, 'y': 6},
+            {'piece': "pawn",   'owner': 0, 'x': 4, 'y': 6},
+            {'piece': "pawn",   'owner': 0, 'x': 5, 'y': 5},
+            {'piece': "pawn",   'owner': 0, 'x': 6, 'y': 4},
+            {'piece': "pawn",   'owner': 0, 'x': 7, 'y': 6},
+            {'piece': "queen",  'owner': 0, 'x': 3, 'y': 7},
+            {'piece': "king",   'owner': 0, 'x': 4, 'y': 7},
+            {'piece': "bishop", 'owner': 0, 'x': 5, 'y': 7},
+            {'piece': "knight", 'owner': 0, 'x': 6, 'y': 7},
+            {'piece': "rook",   'owner': 0, 'x': 7, 'y': 7}
+        ]
+        self.assertEquals(isMate(pieces, 0), True, "Pawn cant move diagonally to block queen")
+
+    def test_15_pawn_can_block_by_moving_forward(self):
+        pieces = [
+            {'piece': "king",   'owner': 1, 'x': 4, 'y': 0},
+            {'piece': "queen",  'owner': 1, 'x': 7, 'y': 4, 'prevX': 3, 'prevY': 0},
+            {'piece': "pawn",   'owner': 0, 'x': 3, 'y': 6},
+            {'piece': "pawn",   'owner': 0, 'x': 4, 'y': 6},
+            {'piece': "pawn",   'owner': 0, 'x': 5, 'y': 5},
+            {'piece': "pawn",   'owner': 0, 'x': 6, 'y': 6},
+            {'piece': "queen",  'owner': 0, 'x': 3, 'y': 7},
+            {'piece': "king",   'owner': 0, 'x': 4, 'y': 7},
+            {'piece': "bishop", 'owner': 0, 'x': 5, 'y': 7},
+            {'piece': "knight", 'owner': 0, 'x': 6, 'y': 7}
+        ]
+        self.assertEquals(isMate(pieces, 0), False, "Pawn can move forward to block attack")
+
+    def test_16_pawn_can_block_by_moving_forward_two_squares(self):
+        pieces = [
+            {'piece': "king",   'owner': 1, 'x': 4, 'y': 0},
+            {'piece': "rook",   'owner': 1, 'x': 6, 'y': 0},
+            {'piece': "bishop", 'owner': 1, 'x': 1, 'y': 1, 'prevX': 2, 'prevY': 0},
+            {'piece': "pawn",   'owner': 0, 'x': 4, 'y': 6},
+            {'piece': "pawn",   'owner': 0, 'x': 7, 'y': 6},
+            {'piece': "king",   'owner': 0, 'x': 7, 'y': 7}
+        ]
+        self.assertEquals(isMate(pieces, 0), False, "Pawn can move forward two squares to block attack")
+
+    def test_17_pawn_can_capture_attacking_pawn_en_passant(self):
+        pieces = [
+            {'piece': "bishop", 'owner': 1, 'x': 4, 'y': 2},
+            {'piece': "rook",   'owner': 1, 'x': 5, 'y': 2},
+            {'piece': "knight", 'owner': 1, 'x': 3, 'y': 3},
+            {'piece': "pawn",   'owner': 1, 'x': 4, 'y': 3},
+            {'piece': "king",   'owner': 1, 'x': 5, 'y': 3},
+            {'piece': "pawn",   'owner': 1, 'x': 3, 'y': 4},
+            {'piece': "pawn",   'owner': 0, 'x': 4, 'y': 4, 'prevX': 4, 'prevY': 6},
+            {'piece': "knight", 'owner': 0, 'x': 2, 'y': 5},
+            {'piece': "queen",  'owner': 0, 'x': 6, 'y': 5},
+            {'piece': "pawn",   'owner': 0, 'x': 5, 'y': 6},
+            {'piece': "king",   'owner': 0, 'x': 4, 'y': 7}
+        ]
+        self.assertEquals(isMate(pieces, 1), False, "Pawn can capture another pawn en passant")
 
 if __name__ == '__main__':
     unittest.main()
+
+
+
