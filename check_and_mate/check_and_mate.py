@@ -53,22 +53,32 @@ def isPathObstructed(attacker, x, y, board):
             return True
     return False
 
-
 def isPawnOnStartingRank(y, direction):
     return (y - direction) in (0, 7)
 
+def hasPawnMovedTwoSquares(piece):
+    return piece['piece'] == 'pawn' and piece['y'] - piece['prevY'] == 2 * direction(piece['owner'])
 
 def isPawnAttacking(attacker, x, y, board, with_attack):
     diff_x = x - attacker['x']
     diff_y = y - attacker['y']
     attack_direction = direction(attacker['owner'])
     if with_attack:
-        return diff_x in (-1, 1) and diff_y == attack_direction
+        if diff_x in (-1, 1) and diff_y == attack_direction :
+            return True
+        # check en passant
+        if diff_x in (-1, 1) and diff_y == 0:
+            candidates = findByPosition(board, x, y)
+            if candidates:
+                for candidate in candidates:
+                    if hasPawnMovedTwoSquares(candidate) and isPawnOnStartingRank(candidate['prevY'], -attack_direction):
+                        return True
+        return False
     else:
         if isPawnOnStartingRank(attacker['y'], attack_direction):
-            return diff_x == 0 and diff_y == attack_direction
-        else:
             return diff_x == 0 and diff_y in (attack_direction, 2*attack_direction)
+        else:
+            return diff_x == 0 and diff_y == attack_direction
 
 
 def isBisshopAttacking(attacker, x, y, board, with_attack):
@@ -170,16 +180,15 @@ def findPiecesThatCanMoveToSquare(x, y, board, target_player, with_attack=True):
     return filter(lambda p: canMoveInto(p, x, y, board, with_attack), enemies)
 
 def findPiecesAttackers(piece, board, target_player):
-    return findPiecesThatCanMoveToSquare(piece['x'], piece['y'], board, target_player, True)
+    return findPiecesThatCanMoveToSquare(piece['x'], piece['y'], board, target_player)
 
 
 # Returns true if the arrangement of the
 # pieces is a check mate, otherwise false
 def isMate(board, player):
-    # outputBoard(pieces)
-    king = findByOwner(findByType(board, "king"), player)[0]
-    enemies = findByOwner(board, enemy(player))
-    attackers = filter(lambda p: canMoveInto(p, king['x'], king['y'], board), enemies)
+    # outputBoard(board)
+    king = findMyKing(board, player)
+    attackers = findPiecesAttackers(king, board, player)
     if attackers:
         if canEscapeCheck(king, board):
             return False
@@ -191,12 +200,12 @@ def isMate(board, player):
         return True
     else:
         return False
+
+
 # Returns an array of threats if the arrangement of
 # the pieces is a check, otherwise false
-
-
 def isCheck(board, player):
-    # outputBoard(pieces)
+    # outputBoard(board)
     king = findMyKing(board, player)
     attackers = findPiecesAttackers(king, board, player)
     return attackers if len(attackers) > 0 else False

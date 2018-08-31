@@ -298,8 +298,50 @@ class TestMates(unittest.TestCase):
         ]
         self.assertEquals(isMate(pieces, 1), False, "Pawn can capture another pawn en passant")
 
+    def test_18_pawn_is_pinned_and_cant_capture_en_passant(self):
+        pieces = [
+            {'piece': "bishop", 'owner': 1, 'x': 4, 'y': 2},
+            {'piece': "rook",   'owner': 1, 'x': 5, 'y': 2},
+            {'piece': "knight", 'owner': 1, 'x': 3, 'y': 3},
+            {'piece': "pawn",   'owner': 1, 'x': 4, 'y': 3},
+            {'piece': "king",   'owner': 1, 'x': 5, 'y': 3},
+            {'piece': "pawn",   'owner': 1, 'x': 5, 'y': 4},
+            {'piece': "pawn",   'owner': 0, 'x': 4, 'y': 4, 'prevX': 4, 'prevY': 6},
+            {'piece': "knight", 'owner': 0, 'x': 2, 'y': 5},
+            {'piece': "rook",   'owner': 0, 'x': 5, 'y': 5},
+            {'piece': "pawn",   'owner': 0, 'x': 5, 'y': 6},
+            {'piece': "queen",  'owner': 0, 'x': 6, 'y': 6},
+            {'piece': "king",   'owner': 0, 'x': 4, 'y': 7}
+        ]
+        self.assertEquals(isMate(pieces, 1), True, "Pinned pawn cant capture another pawn en passant")
+
+    def test_19_pawn_cant_capture_queen_en_passant(self):
+        pieces = [
+            {'piece': "bishop", 'owner': 1, 'x': 4, 'y': 2},
+            {'piece': "rook",   'owner': 1, 'x': 5, 'y': 2},
+            {'piece': "knight", 'owner': 1, 'x': 3, 'y': 3},
+            {'piece': "pawn",   'owner': 1, 'x': 4, 'y': 3},
+            {'piece': "king",   'owner': 1, 'x': 5, 'y': 3},
+            {'piece': "pawn",   'owner': 1, 'x': 3, 'y': 4},
+            {'piece': "queen",   'owner': 0, 'x': 4, 'y': 4, 'prevX': 4, 'prevY': 6},
+            {'piece': "knight", 'owner': 0, 'x': 2, 'y': 5},
+            {'piece': "queen",  'owner': 0, 'x': 6, 'y': 5},
+            {'piece': "pawn",   'owner': 0, 'x': 5, 'y': 6},
+            {'piece': "king",   'owner': 0, 'x': 4, 'y': 7}
+        ]
+        self.assertEquals(isMate(pieces, 1), True, "Pawn cant capture queen en passant")
+
+    def test_20_king_has_no_move_but_there_is_no_check(self):
+        pieces = [
+            {'piece': "king", 'owner': 1, 'x': 4, 'y': 1, 'prevX': 4, 'prevY': 0},
+            {'piece': "king", 'owner': 0, 'x': 4, 'y': 7},
+            {'piece': "pawn", 'owner': 0, 'x': 3, 'y': 6},
+            {'piece': "pawn", 'owner': 0, 'x': 4, 'y': 6},
+            {'piece': "pawn", 'owner': 0, 'x': 5, 'y': 6},
+            {'piece': "rook", 'owner': 0, 'x': 3, 'y': 7},
+            {'piece': "rook", 'owner': 0, 'x': 5, 'y': 7}
+        ]
+        self.assertEquals(isMate(pieces, 0), False, "King is safe. There is no check")
+
 if __name__ == '__main__':
     unittest.main()
-
-
-
