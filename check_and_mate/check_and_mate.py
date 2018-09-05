@@ -27,28 +27,27 @@ def findByPosition(pieces, x, y):
 def findMyKing(board, owner):
     return findByOwner(findByType(board, "king"), owner)[0]
 
+def inBounds(coord):
+    return 0 <= coord <= 7
 
 def getSurroundingSquares(piece):
     for i in range(-1, 2):
         for j in range(-1, 2):
             if (i, j) != (0, 0):
-                new_x = piece['x'] + i
-                new_y = piece['y'] + j
-                if 0 <= new_x <= 7 and 0 <= new_y <= 7:
-                    yield (new_x, new_y)
+                new_square = (piece['x'] + i, piece['y'] + j)
+                if all(map(inBounds, new_square)):
+                    yield new_square
 
-
-def getInBeetweenSquares(attacker, x, y, ):
-    grad_x = sign(x - attacker['x'])
-    grad_y = sign(y - attacker['y'])
-    pos_x, pos_y = attacker['x'], attacker['y']
-    while (pos_x + grad_x != x or pos_y + grad_y != y):
-        pos_x += grad_x
-        pos_y += grad_y
+def getInBetweenSquares(attacker, x, y):
+    grad_x, grad_y = sign(x - attacker['x']), sign(y - attacker['y'])
+    pos_x, pos_y = attacker['x'] + grad_x, attacker['y'] + grad_y
+    while pos_x != x or pos_y != y:
         yield (pos_x, pos_y)
+        pos_y += grad_y
+        pos_x += grad_x
 
 def isPathObstructed(attacker, x, y, board):
-    for (x, y) in getInBeetweenSquares(attacker, x, y, ):
+    for (x, y) in getInBetweenSquares(attacker, x, y, ):
         if findByPosition(board, x, y):
             return True
     return False
@@ -68,11 +67,9 @@ def isPawnAttacking(attacker, x, y, board, with_attack):
             return True
         # check en passant
         if diff_x in (-1, 1) and diff_y == 0:
-            candidates = findByPosition(board, x, y)
-            if candidates:
-                for candidate in candidates:
-                    if hasPawnMovedTwoSquares(candidate) and isPawnOnStartingRank(candidate['prevY'], -attack_direction):
-                        return True
+            for candidate in findByPosition(board, x, y):
+                if hasPawnMovedTwoSquares(candidate) and isPawnOnStartingRank(candidate['prevY'], -attack_direction):
+                    return True
         return False
     else:
         if isPawnOnStartingRank(attacker['y'], attack_direction):
@@ -168,7 +165,7 @@ def canPieceBeCaptured(piece, board, strict=True, with_attack=True):
 
 def canAttackBeBlocked(attacker, king, board):
     if attacker['piece'] != 'knight':
-        for (x, y) in getInBeetweenSquares(attacker, king['x'], king['y']):
+        for (x, y) in getInBetweenSquares(attacker, king['x'], king['y']):
             fake = {'type': 'fake', 'x': x, 'y': y, 'owner': enemy(king['owner'])}
             if canPieceBeCaptured(fake, board, strict=True, with_attack=False):
                 return True
