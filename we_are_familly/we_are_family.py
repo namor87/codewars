@@ -1,5 +1,6 @@
 import itertools
 
+
 class Person:
     FEMALE = "F"
     MALE = "M"
@@ -21,17 +22,19 @@ class Person:
         return self == person or any(map(lambda p: p.__is_ancestor_of(person), self._children))
 
     def add_parent(self, parent):
-        if self._parents.__contains__(parent) :
+        if self._parents.__contains__(parent):
             return True
         if len(self._parents) > 1:
             return False
         if len(self._parents) == 1:
-            if all(map(Person.is_female, self._parents + [parent])) :
+            if all(map(Person.is_female, self._parents + [parent])):
                 return False
-            if all(map(Person.is_male, self._parents + [parent])) :
+            if all(map(Person.is_male, self._parents + [parent])):
                 return False
-        if self.__is_ancestor_of(parent) :
+        if self.__is_ancestor_of(parent):
+            # if self != parent:
             return False
+        self._infer_gender(parent)
         self._parents.append(parent)
         return True
 
@@ -48,6 +51,8 @@ class Person:
     def female(self):
         if self.is_male():
             return False
+        if self.is_female():
+            return True
         if any(map(Person.is_female, self._get_spouses())):
             return False
         self._gender = self.FEMALE
@@ -62,6 +67,8 @@ class Person:
     def male(self):
         if self.is_female():
             return False
+        if self.is_male():
+            return True
         if any(map(Person.is_male, self._get_spouses())):
             return False
         self._gender = self.MALE
@@ -75,6 +82,22 @@ class Person:
 
     def is_male(self):
         return self._gender == self.MALE
+
+    def _infer_gender(self, parent):
+        if len(self._parents) > 0:
+            other = self._parents[0]
+            if other.is_male():
+                if not parent.female():
+                    return False
+            if other.is_female():
+                if not parent.male():
+                    return False
+            if parent.is_male():
+                if not other.female():
+                    return False
+            if parent.is_female():
+                if not other.male():
+                    return False
 
 
 class family:
@@ -108,4 +131,3 @@ class family:
 
     def get_children_of(self, name):
         return sorted(map(Person.get_name, self.__get_person(name).get_children()))
-
