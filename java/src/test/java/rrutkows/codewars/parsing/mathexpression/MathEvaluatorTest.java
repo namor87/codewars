@@ -2,9 +2,8 @@ package rrutkows.codewars.parsing.mathexpression;
 
 
 import org.junit.Test;
-import rrutkows.codewars.parsing.mathexpression.MathEvaluator;
-
 import static org.junit.Assert.assertEquals;
+
 
 public class MathEvaluatorTest {
     @Test public void testAddition() {

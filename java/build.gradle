@@ -2,6 +2,12 @@ plugins {
     id 'java'
 }
 
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(11)
+    }
+}
+
 group 'org.example'
 version '1.0-SNAPSHOT'
 
@@ -10,13 +16,26 @@ repositories {
 }
 
 dependencies {
-    testImplementation("junit:junit:4.13.2")
-    testRuntimeOnly("org.junit.vintage:junit-vintage-engine:5.8.2")
+	testImplementation("org.junit.jupiter:junit-jupiter:5.8.2")
 }
 
+dependencies {
+	testImplementation(
+	    'junit:junit:4.13.2',
+	    'org.hamcrest:hamcrest:2.2'
+	)
+	testRuntimeOnly("org.junit.vintage:junit-vintage-engine:5.8.2")
+}
+
+
 test {
-//    useJUnitPlatform()
-    useJUnit()
+		useJUnitPlatform {
+    		// includeEngines("junit-jupiter", "junit-vintage")
+    		// excludeEngines("custom-engine")
+    	}
+    	testLogging {
+    		events("passed", "skipped", "failed")
+    	}
 }
 
 
