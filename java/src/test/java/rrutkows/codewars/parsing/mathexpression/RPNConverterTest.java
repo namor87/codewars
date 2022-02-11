@@ -209,7 +209,7 @@ public class RPNConverterTest {
                 BinaryOperation.DIVIDE,
                 new TerminalValue(6.0),
                 BinaryOperation.MULTIPLY,
-                new TerminalValue(1.0)
+                new TerminalValue(5.0)
         );
 
         final List<MathToken> actual = converter.apply(infix);
@@ -265,7 +265,7 @@ public class RPNConverterTest {
                 BinaryOperation.ADD,
                 BinaryOperation.MULTIPLY,
                 new TerminalValue(6.0),
-                new TerminalValue(5.0),
+                new TerminalValue(1.0),
                 BinaryOperation.MULTIPLY,
                 BinaryOperation.DIVIDE
         ));
