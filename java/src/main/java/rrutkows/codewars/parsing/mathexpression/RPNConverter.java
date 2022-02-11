@@ -1,12 +1,11 @@
 package rrutkows.codewars.parsing.mathexpression;
 
 import java.util.List;
-import java.util.Stack;
 import java.util.function.Function;
 
-public class RPNConverter implements Function<List<MathToken>, Stack<MathToken>> {
+public class RPNConverter implements Function<List<MathToken>, List<MathToken>> {
     @Override
-    public Stack<MathToken> apply(List<MathToken> mathTokens) {
+    public List<MathToken> apply(List<MathToken> infixTokens) {
         return null;
     }
 }

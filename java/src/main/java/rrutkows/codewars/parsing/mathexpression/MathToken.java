@@ -8,37 +8,18 @@ public interface MathToken {
 
     TokenType getType();
 
-    Double getValue();
-
-    Function<Double, Double> getUnaryOperation() throws UnsupportedOperationException;
-
-    BiFunction<Double, Double, Double> getBinaryOperation() throws UnsupportedOperationException;
-
     enum TokenType {
-        VALUE,
+        NUMBER,
         BINARY_OPERATION,
-        UNARY_OPERATION
+        UNARY_OPERATION,
+        PARENTHESIS_OPEN,
+        PARENTHESIS_CLOSE
     }
+}
 
-    public class MathTokenFactory {
-
-
-
-        static MathToken of(String representation) throws IllegalArgumentException {
-            try {
-                switch (representation) {
-                    case "+": return BinaryOperation.OPERATOR_ADD;
-                    case "-": return BinaryOperation.OPERATOR_SUBTRACT;
-                    case "*": return BinaryOperation.OPERATOR_MULTIPLY;
-                    case "/": return BinaryOperation.OPERATOR_DIVIDE;
-                    default:  return new TerminalValue(Double.valueOf(representation));
-                }
-            }
-            catch (NumberFormatException nfe) {
-                throw new IllegalArgumentException(String.format("Unable to interpret token: [%s]", representation), nfe);
-            }
-        }
-    }
+interface MathOperator {
+    Integer getPrecedence();
+    BiFunction<Double, Double, Double> getBinaryOperation();
 }
 
 class TerminalValue implements MathToken {
@@ -52,8 +33,7 @@ class TerminalValue implements MathToken {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        TerminalValue that = (TerminalValue) o;
-        return value.equals(that.value);
+        return value.equals(((TerminalValue) o).value);
     }
 
     @Override
@@ -67,41 +47,59 @@ class TerminalValue implements MathToken {
         this.value = value;
     }
 
-    @Override
+
     public Double getValue() {
         return value;
     }
 
     @Override
     public TokenType getType() {
-        return TokenType.VALUE;
+        return TokenType.NUMBER;
+    }
+
+}
+
+class Parenthesis implements MathToken {
+    public static final Parenthesis OPENING = new Parenthesis(true, TokenType.PARENTHESIS_OPEN);
+    public static final Parenthesis CLOSING = new Parenthesis(false, TokenType.PARENTHESIS_CLOSE);
+
+    private final boolean isOpening;
+    private final TokenType type;
+
+    private Parenthesis(boolean isOpening, TokenType type) {
+        this.isOpening = isOpening;
+        this.type = type;
     }
 
     @Override
-    public BiFunction<Double, Double, Double> getBinaryOperation() throws UnsupportedOperationException {
-        throw new UnsupportedOperationException("Can't get operation of a value Token");
+    public String toString() {
+        return String.format("Parenthesis{%s}", isOpening ? "(" : ")");
     }
 
     @Override
-    public Function<Double, Double> getUnaryOperation() throws UnsupportedOperationException {
-        throw new UnsupportedOperationException("Can't get operation of a value Token");
+    public TokenType getType() {
+        return type;
+    }
+
+    public boolean isOpening() {
+        return isOpening;
     }
 }
 
 class UnaryOperation implements MathToken {
-    public static final UnaryOperation UNARY_MINUS = new UnaryOperation("-", x -> -x);
-
-    @Override
-    public String toString() {
-        return String.format("UnaryOperation{%s}", description);
-    }
+    public static final UnaryOperation MINUS = new UnaryOperation("-", x -> -x);
 
     private final String description;
     private final Function<Double, Double> operation;
 
-    UnaryOperation(String description, Function<Double, Double> operation) {
+    private UnaryOperation(String description, Function<Double, Double> operation) {
         this.description = description;
         this.operation = operation;
+    }
+
+    @Override
+    public String toString() {
+        return String.format("UnaryOperation{%s}", description);
     }
 
     @Override
@@ -109,39 +107,30 @@ class UnaryOperation implements MathToken {
         return TokenType.UNARY_OPERATION;
     }
 
-    @Override
-    public Double getValue() {
-        throw new UnsupportedOperationException("Can't get value of a binary operation Token");
-    }
-
-    @Override
-    public Function<Double, Double> getUnaryOperation() throws UnsupportedOperationException {
+    public Function<Double, Double> getUnaryOperation() {
         return operation;
-    }
-
-    @Override
-    public BiFunction<Double, Double, Double> getBinaryOperation() throws UnsupportedOperationException {
-        throw new UnsupportedOperationException("Can't get binary operation of a unary operation Token");
     }
 }
 
-class BinaryOperation implements MathToken {
-    public static final BinaryOperation OPERATOR_ADD = new BinaryOperation("+", (a, b) -> a + b);
-    public static final BinaryOperation OPERATOR_SUBTRACT = new BinaryOperation("-", (a, b) -> a - b);
-    public static final BinaryOperation OPERATOR_MULTIPLY = new BinaryOperation("*", (a, b) -> a * b);
-    public static final BinaryOperation OPERATOR_DIVIDE = new BinaryOperation("/", (a, b) -> a / b);
+class BinaryOperation implements MathToken, MathOperator {
+    public static final BinaryOperation ADD = new BinaryOperation("+", (a, b) -> a + b, 20);
+    public static final BinaryOperation SUBTRACT = new BinaryOperation("-", (a, b) -> a - b, 20);
+    public static final BinaryOperation MULTIPLY = new BinaryOperation("*", (a, b) -> a * b, 30);
+    public static final BinaryOperation DIVIDE = new BinaryOperation("/", (a, b) -> a / b, 30);
+
+    private final String description;
+    private final BiFunction<Double, Double, Double> operation;
+    private final Integer precedence;
+
+    private BinaryOperation(String description, BiFunction<Double, Double, Double> operation, Integer precedence) {
+        this.description = description;
+        this.operation = operation;
+        this.precedence = precedence;
+    }
 
     @Override
     public String toString() {
         return String.format("BinaryOperation{%s}", description);
-    }
-
-    private final String description;
-    private final BiFunction<Double, Double, Double> operation;
-
-    BinaryOperation(String description, BiFunction<Double, Double, Double> operation) {
-        this.description = description;
-        this.operation = operation;
     }
 
     @Override
@@ -149,19 +138,11 @@ class BinaryOperation implements MathToken {
         return TokenType.BINARY_OPERATION;
     }
 
-    @Override
-    public Double getValue() {
-        throw new UnsupportedOperationException("Can't get value of a binary operation Token");
+    public Integer getPrecedence() {
+        return precedence;
     }
 
-    @Override
-    public Function<Double, Double> getUnaryOperation() throws UnsupportedOperationException {
-        throw new UnsupportedOperationException("Can't get unary operation of a binary operation Token");
-    }
-
-    @Override
-    public BiFunction<Double, Double, Double> getBinaryOperation() throws UnsupportedOperationException {
+    public BiFunction<Double, Double, Double> getBinaryOperation() {
         return operation;
     }
 }
-
