@@ -270,4 +270,32 @@ public class RPNConverterTest {
                 BinaryOperation.DIVIDE
         ));
     }
+
+    @Test
+    public void unaryMinusBeforeParenthesis() {
+
+        //  20+-(3*4)
+
+        final List<MathToken> infix = List.of(
+                new TerminalValue(20.0),
+                BinaryOperation.ADD,
+                UnaryOperation.MINUS,
+                Parenthesis.OPENING,
+                new TerminalValue(3.0),
+                BinaryOperation.MULTIPLY,
+                new TerminalValue(4.0),
+                Parenthesis.CLOSING
+        );
+
+        final List<MathToken> actual = converter.apply(infix);
+
+        assertThat(actual, contains(
+                new TerminalValue(20.0),
+                new TerminalValue(3.0),
+                new TerminalValue(4.0),
+                BinaryOperation.MULTIPLY,
+                UnaryOperation.MINUS,
+                BinaryOperation.ADD
+        ));
+    }
 }

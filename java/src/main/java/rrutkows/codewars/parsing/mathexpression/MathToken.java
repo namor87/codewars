@@ -19,7 +19,6 @@ public interface MathToken {
 
 interface MathOperator {
     Integer getPrecedence();
-    BiFunction<Double, Double, Double> getBinaryOperation();
 }
 
 class TerminalValue implements MathToken {
@@ -84,9 +83,10 @@ class Parenthesis implements MathToken {
     public boolean isOpening() {
         return isOpening;
     }
+
 }
 
-class UnaryOperation implements MathToken {
+class UnaryOperation implements MathToken, MathOperator {
     public static final UnaryOperation MINUS = new UnaryOperation("-", x -> -x);
 
     private final String description;
@@ -109,6 +109,11 @@ class UnaryOperation implements MathToken {
 
     public Function<Double, Double> getUnaryOperation() {
         return operation;
+    }
+
+    @Override
+    public Integer getPrecedence() {
+        return 50;
     }
 }
 
@@ -138,6 +143,7 @@ class BinaryOperation implements MathToken, MathOperator {
         return TokenType.BINARY_OPERATION;
     }
 
+    @Override
     public Integer getPrecedence() {
         return precedence;
     }

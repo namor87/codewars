@@ -24,14 +24,18 @@ public class RPNConverter implements Function<List<MathToken>, List<MathToken>> 
                     rpnExpression.add(token);
                     break;
                 case UNARY_OPERATION:
-                    // todo
-                    break;
                 case BINARY_OPERATION:
                     while(! operatorStack.empty()
-                            && operatorStack.peek().getType() == BINARY_OPERATION
-                            && ((MathOperator) operatorStack.peek()).getPrecedence() >= ((MathOperator) token).getPrecedence()
+                        && (
+                            ( operatorStack.peek().getType() == BINARY_OPERATION
+                                    && ((MathOperator) operatorStack.peek()).getPrecedence() >= ((MathOperator) token).getPrecedence()
+                            ) || (
+                                operatorStack.peek().getType() == UNARY_OPERATION
+                                    && ((MathOperator) operatorStack.peek()).getPrecedence() > ((MathOperator) token).getPrecedence()
+                            )
+                        )
                     ) {
-                        rpnExpression.add(pop());
+                        rpnExpression.add(operatorStack.pop());
                     }
                     operatorStack.add(token);
                     break;
@@ -40,9 +44,9 @@ public class RPNConverter implements Function<List<MathToken>, List<MathToken>> 
                     break;
                 case PARENTHESIS_CLOSE:
                     while(! operatorStack.empty() && operatorStack.peek().getType() != PARENTHESIS_OPEN) {
-                        rpnExpression.add(pop());
+                        rpnExpression.add(operatorStack.pop());
                     }
-                    if(operatorStack.empty() || pop().getType() != PARENTHESIS_OPEN) {
+                    if(operatorStack.empty() || operatorStack.pop().getType() != PARENTHESIS_OPEN) {
                         throw new IllegalArgumentException("Parenthesis mismatch!!");
                     }
                     break;
@@ -51,7 +55,7 @@ public class RPNConverter implements Function<List<MathToken>, List<MathToken>> 
             }
         }
         while(! operatorStack.empty()) {
-            final MathToken topToken = pop();
+            final MathToken topToken = operatorStack.pop();
             if(topToken.getType() == PARENTHESIS_OPEN) {
                 throw new IllegalArgumentException("Parenthesis mismatch!!");
             }
@@ -60,7 +64,4 @@ public class RPNConverter implements Function<List<MathToken>, List<MathToken>> 
         return rpnExpression;
     }
 
-    private MathToken pop() {
-        return operatorStack.pop();
-    }
 }

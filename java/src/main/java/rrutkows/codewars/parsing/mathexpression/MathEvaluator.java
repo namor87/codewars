@@ -1,6 +1,5 @@
 package rrutkows.codewars.parsing.mathexpression;
 
-import java.util.List;
 import java.util.function.Function;
 
 public class MathEvaluator {
@@ -31,3 +30,4 @@ class Pipeline<I, O>  {
         return currentHandler.apply(input);
     }
 }
+
